@@ -1,0 +1,240 @@
+<html>
+<head>
+    <title>Puzzle</title>
+    <style>
+        body { margin: 0; padding: 0; overflow: hidden; display: flex; flex-direction: column; align-items: center;background-color: rgb(211, 210, 210); }
+        canvas { display: block; margin: auto; margin-top: 60px; }
+        #score { position: absolute; top: 10px; left: 10px; font-size: 24px; color: black; font-family: 'Arial', sans-serif; }
+        #question { position: absolute; bottom: 230px; left: 620px; font-size: 24px; color: black; font-family: 'Arial', sans-serif; }
+        #options { position: absolute; bottom: 150px; left: 570px; display: flex; gap: 10px; }
+        button { font-size: 18px; padding: 10px; border: none; border-radius: 5px; transition: background-color 0.3s, transform 0.2s; cursor: pointer; }
+        button:hover { transform: scale(1.05); }
+        .correct { background-color: green !important; color: white; }
+        .incorrect { background-color: red !important; color: white; }
+    </style>
+</head>
+<body>
+    <div id="score">Score: 0</div>
+    <div id="question">Which model of car is this?</div>
+    <div id="options">
+        <button id="option1">Option 1</button>
+        <button id="option2">Option 2</button>
+        <button id="option3">Option 3</button>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.1.0/pixi.min.js"></script>
+    <script>
+        const app = new PIXI.Application({ width: 400, height: 300 });
+        document.body.appendChild(app.view);
+
+        let score = 0;
+        const scoreText = document.getElementById('score');
+        const questionText = document.getElementById('question');
+
+        const options = [
+            document.getElementById('option1'),
+            document.getElementById('option2'),
+            document.getElementById('option3')
+        ];
+
+        const questions = [
+            {
+                imageUrl: 'imagess/Audi/audia4.jpg',
+                correctAnswer: 'Audi a4',
+                answers: ['Audi a4', 'Audi a5', 'Audi a6'],
+                level: 'easy'
+            },
+            {
+                imageUrl: 'imagess/Audi/audia5.jpg',
+                correctAnswer: 'Audi a5',
+                answers: ['Audi a5', 'Audi a3', 'Audi a4'],
+                level: 'medium'
+            },
+            {
+                imageUrl: 'imagess/Audi/audia6.jpg',
+                correctAnswer: 'Audi a6',
+                answers: ['Audi a8', 'Audi a6', 'Audi a7'],
+                level: 'hard'
+            },
+            {
+                imageUrl: 'imagess/BMW/bmw3series.jpg',
+                correctAnswer: 'bmw3series',
+                answers: ['bmw3series', 'bmw5series', 'bmw8series'],
+                level: 'medium'
+            },
+            {
+                imageUrl: 'imagess/BMW/bmw4series.jpg',
+                correctAnswer: 'bmw4series',
+                answers: ['bmw1series', 'bmw4series', 'bmw7series'],
+                level: 'hard'
+            },
+            {
+                imageUrl: 'imagess/BMW/bmw5series.jpg',
+                correctAnswer: 'bmw5series',
+                answers: ['bmw4series', 'bmw3series', 'bmw5series'],
+                level: 'easy'
+            },
+            {
+                imageUrl: 'imagess/BMW/bmw6series.jpg',
+                correctAnswer: 'bmw6series',
+                answers: ['bmw6series', 'bmw5series', 'bmw7series'],
+                level: 'hard'
+            },
+            {
+                imageUrl: 'imagess/Mercedes/mercedescclass.jpg',
+                correctAnswer: 'Mercedes c class',
+                answers: ['Mercedes c class', 'Mercedes a class', 'Mercedes e class'],
+                level: 'medium'
+            },
+
+            {
+                imageUrl: 'imagess/Mercedes/mercedeseclass.jpg',
+                correctAnswer: 'Mercedes e class',
+                answers: ['Mercedes e class', 'Mercedes s class', 'Mercedes b class'],
+                level: 'medium'
+            },
+            {
+                imageUrl: 'imagess/Mercedes/mercedessclass.jpg',
+                correctAnswer: 'Mercedes s class',
+                answers: ['Mercedes e class', 'Mercedes c class', 'Mercedes s class'],
+                level: 'easy'
+            },
+
+            {
+                imageUrl: 'imagess/Volkswagen/golf6.jpg',
+                correctAnswer: 'Golf 6',
+                answers: ['Golf 6', 'Golf 8', 'Golf 7'],
+                level: 'hard'
+            },
+
+            {
+                imageUrl: 'imagess/Volkswagen/golf7.jpg',
+                correctAnswer: 'Golf 7',
+                answers: ['Golf 8', 'Golf 6', 'Golf 7'],
+                level: 'hard'
+            },
+            {
+                imageUrl: 'imagess/Volkswagen/golf8.jpg',
+                correctAnswer: 'Golf 8',
+                answers: ['Golf 7', 'Golf 5', 'Golf 8'],
+                level: 'medium'
+            },
+
+            {
+                imageUrl: 'imagess/Volvo/volvoxc40.jpg',
+                correctAnswer: 'Volvoxc40',
+                answers: ['Volvoxc40', 'Volvoxc60', 'Volvoxc90'],
+                level: 'medium'
+            },
+            {
+                imageUrl: 'imagess/Volvo/volvoxc60.jpg',
+                correctAnswer: 'Volvoxc60',
+                answers: ['Volvoxc40', 'Volvoxc60', 'Volvoxc90'],
+                level: 'easy'
+            },
+
+            {
+                imageUrl: 'imagess/Volvo/volvoxc90.jpg',
+                correctAnswer: 'Volvoxc90',
+                answers: ['Volvoxc90', 'Volvoxc40', 'Volvoxc60'],
+                level: 'hard'
+            },
+        ];
+
+        let currentQuestionIndex = 0;
+        let currentQuestion = questions[currentQuestionIndex];
+
+        const imageSprite = new PIXI.Sprite(PIXI.Texture.from(currentQuestion.imageUrl));
+        imageSprite.width = app.renderer.width; // Adjusted width
+        imageSprite.height = app.renderer.height; // Adjusted height
+        imageSprite.x = (app.renderer.width - imageSprite.width) / 2; // Center horizontally
+        imageSprite.y = (app.renderer.height - imageSprite.height) / 2; // Center vertically
+        app.stage.addChild(imageSprite);
+
+        // Custom Pixelate Filter
+        const pixelateFilter = new PIXI.Filter(null, `
+            precision mediump float;
+            uniform sampler2D uSampler;
+            uniform float size;
+            varying vec2 vTextureCoord;
+
+            void main(void)
+            {
+                vec2 coord = vTextureCoord / size;
+                coord = vec2(floor(coord.x), floor(coord.y)) * size;
+                gl_FragColor = texture2D(uSampler, coord);
+            }
+        `, { size: 10 });
+
+        const blurFilter = new PIXI.filters.BlurFilter();
+
+        function applyFilter(level) {
+            switch (level) {
+                case 'easy':
+                    pixelateFilter.uniforms.size = 0.005; 
+                    imageSprite.filters = [pixelateFilter];
+                    break;
+                case 'medium':
+                    pixelateFilter.uniforms.size = 0.00015; 
+                    imageSprite.filters = [pixelateFilter];
+                    break;
+                case 'hard':
+                pixelateFilter.uniforms.size = 0.00015; 
+                imageSprite.filters = [pixelateFilter];
+                    break;
+                default:
+                    imageSprite.filters = [];
+                    break;
+            }
+        }
+
+        function loadQuestion(questionIndex) {
+            currentQuestion = questions[questionIndex];
+            imageSprite.texture = PIXI.Texture.from(currentQuestion.imageUrl);
+
+            // Shuffle answers to randomize the button placement
+            const shuffledAnswers = currentQuestion.answers.sort(() => Math.random() - 0.5);
+
+            for (let i = 0; i < options.length; i++) {
+                options[i].textContent = shuffledAnswers[i];
+                options[i].classList.remove('correct', 'incorrect');
+                options[i].onclick = () => checkAnswer(shuffledAnswers[i], options[i]);
+            }
+
+            questionText.textContent = 'Which car model is this?';
+            applyFilter(currentQuestion.level);
+        }
+
+        function checkAnswer(selectedAnswer, selectedButton) {
+            const correctButton = options.find(button => button.textContent === currentQuestion.correctAnswer);
+
+            if (selectedAnswer === currentQuestion.correctAnswer) {
+                score += 10;
+                scoreText.textContent = `Score: ${score}`;
+                questionText.textContent = 'Correct! Next question:';
+                selectedButton.classList.add('correct');
+            } else {
+                questionText.textContent = 'Wrong! Try again.';
+                selectedButton.classList.add('incorrect');
+                correctButton.classList.add('correct');
+            }
+
+            // Disable buttons after selecting an answer
+            options.forEach(button => button.onclick = null);
+
+            // Load the next question after a short delay
+            setTimeout(() => {
+                currentQuestionIndex++;
+                if (currentQuestionIndex < questions.length) {
+                    loadQuestion(currentQuestionIndex);
+                } else {
+                    questionText.textContent = 'Quiz Completed!';
+                    // Optionally reset the game or display the final score
+                }
+            }, 2000);
+        }
+
+        // Load the first question
+        loadQuestion(currentQuestionIndex);
+    </script>
+</body>
+</html>
