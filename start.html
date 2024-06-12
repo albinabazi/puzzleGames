@@ -1,0 +1,150 @@
+<html>
+<head>
+    <title>Puzzle Hyrje</title>
+    <style>
+        body { 
+            margin: 0; 
+            padding: 0; 
+            overflow: hidden; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            background-color: rgb(211, 210, 210); 
+            font-family: 'Arial', sans-serif;
+        }
+        .container { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            text-align: center; 
+            margin-top: 50px;
+        }
+        h1 { 
+            font-size: 48px; 
+            color: #333; 
+        }
+        p { 
+            font-size: 18px; 
+            color: #555; 
+            max-width: 600px; 
+        }
+        .start-btn { 
+            font-size: 24px; 
+            padding: 15px 30px; 
+            border: none; 
+            border-radius: 5px; 
+            background-color: #007BFF; 
+            color: white; 
+            cursor: pointer; 
+            transition: background-color 0.3s, transform 0.2s; 
+            margin-top: 20px;
+        }
+        .start-btn:hover { 
+            background-color: #0056b3; 
+            transform: scale(1.05); 
+        }
+        .slider { 
+            position: relative; 
+            width: 90%; 
+            max-width: 780px; 
+            margin: 30px auto; 
+            overflow: hidden; 
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .slides { 
+            display: flex; 
+            transition: transform 1s ease-in-out;
+        }
+        .slide { 
+            min-width: 100%; 
+            box-sizing: border-box; 
+        }
+        .slide img { 
+            width: 100%; 
+            border-radius: 10px; 
+            height: 85%;
+        }
+        .controls { 
+            position: absolute; 
+            top: 50%; 
+            width: 100%; 
+            display: flex; 
+            justify-content: space-between; 
+            transform: translateY(-50%);
+        }
+        .control { 
+            background-color: rgba(0, 0, 0, 0.5); 
+            color: white; 
+            border: none; 
+            cursor: pointer; 
+            font-size: 18px; 
+            padding: 10px;
+        }
+        .control:hover { 
+            background-color: rgba(0, 0, 0, 0.8); 
+        }
+        audio { 
+            display: none; 
+        }
+        @keyframes slide-in {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(0); }
+        }
+        .slide.animate-in {
+            animation: slide-in 1s forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Mirësevini në Lojën Puzzle të Modeleve të Vetures</h1>
+        <p>Gjithçka që duhet të bëni është të gjeni modelin e saktë të veturës në bazë të fotos së dhënë. Shijoni lojën dhe sfidoni veten tuaj!</p>
+        <button class="start-btn" onclick="startGame()">Fillo Lojën</button>
+        
+        <div class="slider">
+            <div class="slides">
+                <div class="slide"><img src="imagess/Audi/audia4.jpg" alt="Audi a4"></div>
+                <div class="slide"><img src="imagess/BMW/bmw3series.jpg" alt="BMW 3 Series"></div>
+                <div class="slide"><img src="imagess/Mercedes/mercedescclass.jpg" alt="Mercedes C Class"></div>
+                <div class="slide"><img src="imagess/Volkswagen/golf6.jpg" alt="Volkswagen Golf 6"></div>
+                <div class="slide"><img src="imagess/Volvo/volvoxc40.jpg" alt="Volvo XC40"></div>
+            </div>
+            <div class="controls">
+                <button class="control prev" onclick="moveSlide(-1)">❮</button>
+                <button class="control next" onclick="moveSlide(1)">❯</button>
+            </div>
+        </div>
+        
+        <audio id="background-music" loop>
+            <source src="../puzzle game/music/Scheming Weasel Faster (Kevin Macleod) - Background Music (HD)_Xi69bI9vKDg.mp3" type="audio/mp3">
+            Your browser does not support the audio element.
+        </audio>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelector('.slides');
+        const totalSlides = document.querySelectorAll('.slide').length;
+        const music = document.getElementById('background-music');
+        music.play();
+
+        function moveSlide(direction) {
+            const slidesArray = Array.from(document.querySelectorAll('.slide'));
+            slidesArray.forEach(slide => slide.classList.remove('animate-in'));
+            
+            currentSlide = (currentSlide + direction + totalSlides) % totalSlides;
+            slides.style.transform = `translateX(-${currentSlide * 100}%)`;
+            slidesArray[currentSlide].classList.add('animate-in');
+        }
+
+        function startGame() {
+            window.location.href = "puzzle.html"; 
+        }
+
+        document.querySelector('.start-btn').addEventListener('click', () => {
+            music.pause();
+        });
+    </script>
+</body>
+</html>

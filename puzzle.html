@@ -2,33 +2,58 @@
 <head>
     <title>Puzzle</title>
     <style>
-        body { margin: 0; padding: 0; overflow: hidden; display: flex; flex-direction: column; align-items: center;background-color: rgb(211, 210, 210); }
+        #result { display: none; position: absolute; top: 100px; right: 200px; transform: translate(50%, -50%); text-align: center; font-family:'Courier New', Courier, monospace; }
+        #result img { max-width: 100%; height: auto; }
+        .gif { right: 30px;}
+        body { margin: 0; padding: 0; overflow: hidden; display: flex; flex-direction: column; align-items: center; background-color: rgb(211, 210, 210); }
         canvas { display: block; margin: auto; margin-top: 60px; }
         #score { position: absolute; top: 10px; left: 10px; font-size: 24px; color: black; font-family: 'Arial', sans-serif; }
-        #question { position: absolute; bottom: 230px; left: 620px; font-size: 24px; color: black; font-family: 'Arial', sans-serif; }
-        #options { position: absolute; bottom: 150px; left: 570px; display: flex; gap: 10px; }
+        #question { position: absolute; bottom: 200px; left: 700px; font-size: 24px; color: black; font-family: 'Arial', sans-serif; }
+        #options { position: absolute; bottom: 140px; left: 750px; display: flex; gap: 10px; }
         button { font-size: 18px; padding: 10px; border: none; border-radius: 5px; transition: background-color 0.3s, transform 0.2s; cursor: pointer; }
         button:hover { transform: scale(1.05); }
         .correct { background-color: green !important; color: white; }
         .incorrect { background-color: red !important; color: white; }
+        #audio-button { background-color: rgb(211, 210, 210); border: none; cursor: pointer; }
+        #audio { display: block; position: absolute; right: 1500px; }
+        svg { width: 30px; height: 30px; margin-left: 20px; top: 10px;}
     </style>
 </head>
 <body>
     <div id="score">Score: 0</div>
-    <div id="question">Which model of car is this?</div>
+    <div id="audio">
+        <audio id="background-audio" src="Scheming Weasel Faster (Kevin Macleod) - Background Music (HD)_Xi69bI9vKDg.mp3" loop autoplay></audio>
+        <button id="audio-button">
+            <svg id="audio-control" viewBox="0 0 24 24" fill="black" xmlns="http://www.w3.org/2000/svg">
+                <path id="audio-path" d="M3 9v6h4l5 5V4l-5 5H3zm13.59 3l2.7 2.7-1.41 1.41-2.7-2.7V14.5h-2v-5h2v1.29l2.7-2.7 1.41 1.41-2.7 2.7z"/>
+            </svg>
+        </button>
+    </div>
+    <div id="question">Cili është modeli i veturës së dhënë?</div>
     <div id="options">
         <button id="option1">Option 1</button>
         <button id="option2">Option 2</button>
         <button id="option3">Option 3</button>
     </div>
+    <div id="result">
+        <h1>Congratulations!</h1>
+        <p>Your score is: <span id="final-score"></span></p>
+        <img id="result-gif" class="gif" src="" alt="Result GIF">
+    </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.1.0/pixi.min.js"></script>
     <script>
-        const app = new PIXI.Application({ width: 400, height: 300 });
+        const app = new PIXI.Application({ width: 800, height: 500 });
         document.body.appendChild(app.view);
 
         let score = 0;
         const scoreText = document.getElementById('score');
         const questionText = document.getElementById('question');
+        const audioControl = document.getElementById('audio-control');
+        const audioButton = document.getElementById('audio-button');
+        const backgroundAudio = document.getElementById('background-audio');
+        const result = document.getElementById('result');
+        const finalScoreText = document.getElementById('final-score');
+        const resultGif = document.getElementById('result-gif');
 
         const options = [
             document.getElementById('option1'),
@@ -47,25 +72,25 @@
                 imageUrl: 'imagess/Audi/audia5.jpg',
                 correctAnswer: 'Audi a5',
                 answers: ['Audi a5', 'Audi a3', 'Audi a4'],
-                level: 'medium'
+                level: 'easy'
             },
             {
                 imageUrl: 'imagess/Audi/audia6.jpg',
                 correctAnswer: 'Audi a6',
                 answers: ['Audi a8', 'Audi a6', 'Audi a7'],
-                level: 'hard'
+                level: 'easy'
             },
             {
                 imageUrl: 'imagess/BMW/bmw3series.jpg',
                 correctAnswer: 'bmw3series',
                 answers: ['bmw3series', 'bmw5series', 'bmw8series'],
-                level: 'medium'
+                level: 'easy'
             },
             {
                 imageUrl: 'imagess/BMW/bmw4series.jpg',
                 correctAnswer: 'bmw4series',
                 answers: ['bmw1series', 'bmw4series', 'bmw7series'],
-                level: 'hard'
+                level: 'easy'
             },
             {
                 imageUrl: 'imagess/BMW/bmw5series.jpg',
@@ -77,20 +102,20 @@
                 imageUrl: 'imagess/BMW/bmw6series.jpg',
                 correctAnswer: 'bmw6series',
                 answers: ['bmw6series', 'bmw5series', 'bmw7series'],
-                level: 'hard'
+                level: 'easy'
             },
             {
                 imageUrl: 'imagess/Mercedes/mercedescclass.jpg',
                 correctAnswer: 'Mercedes c class',
                 answers: ['Mercedes c class', 'Mercedes a class', 'Mercedes e class'],
-                level: 'medium'
+                level: 'easy'
             },
 
             {
                 imageUrl: 'imagess/Mercedes/mercedeseclass.jpg',
                 correctAnswer: 'Mercedes e class',
                 answers: ['Mercedes e class', 'Mercedes s class', 'Mercedes b class'],
-                level: 'medium'
+                level: 'easy'
             },
             {
                 imageUrl: 'imagess/Mercedes/mercedessclass.jpg',
@@ -103,27 +128,27 @@
                 imageUrl: 'imagess/Volkswagen/golf6.jpg',
                 correctAnswer: 'Golf 6',
                 answers: ['Golf 6', 'Golf 8', 'Golf 7'],
-                level: 'hard'
+                level: 'easy'
             },
 
             {
                 imageUrl: 'imagess/Volkswagen/golf7.jpg',
                 correctAnswer: 'Golf 7',
                 answers: ['Golf 8', 'Golf 6', 'Golf 7'],
-                level: 'hard'
+                level: 'easy'
             },
             {
                 imageUrl: 'imagess/Volkswagen/golf8.jpg',
                 correctAnswer: 'Golf 8',
                 answers: ['Golf 7', 'Golf 5', 'Golf 8'],
-                level: 'medium'
+                level: 'easy'
             },
 
             {
                 imageUrl: 'imagess/Volvo/volvoxc40.jpg',
                 correctAnswer: 'Volvoxc40',
                 answers: ['Volvoxc40', 'Volvoxc60', 'Volvoxc90'],
-                level: 'medium'
+                level: 'easy'
             },
             {
                 imageUrl: 'imagess/Volvo/volvoxc60.jpg',
@@ -136,7 +161,7 @@
                 imageUrl: 'imagess/Volvo/volvoxc90.jpg',
                 correctAnswer: 'Volvoxc90',
                 answers: ['Volvoxc90', 'Volvoxc40', 'Volvoxc60'],
-                level: 'hard'
+                level: 'easy'
             },
         ];
 
@@ -144,13 +169,12 @@
         let currentQuestion = questions[currentQuestionIndex];
 
         const imageSprite = new PIXI.Sprite(PIXI.Texture.from(currentQuestion.imageUrl));
-        imageSprite.width = app.renderer.width; // Adjusted width
-        imageSprite.height = app.renderer.height; // Adjusted height
-        imageSprite.x = (app.renderer.width - imageSprite.width) / 2; // Center horizontally
-        imageSprite.y = (app.renderer.height - imageSprite.height) / 2; // Center vertically
+        imageSprite.width = app.renderer.width; 
+        imageSprite.height = app.renderer.height; 
+        imageSprite.x = (app.renderer.width - imageSprite.width) / 2; 
+        imageSprite.y = (app.renderer.height - imageSprite.height) / 2; 
         app.stage.addChild(imageSprite);
 
-        // Custom Pixelate Filter
         const pixelateFilter = new PIXI.Filter(null, `
             precision mediump float;
             uniform sampler2D uSampler;
@@ -191,7 +215,6 @@
             currentQuestion = questions[questionIndex];
             imageSprite.texture = PIXI.Texture.from(currentQuestion.imageUrl);
 
-            // Shuffle answers to randomize the button placement
             const shuffledAnswers = currentQuestion.answers.sort(() => Math.random() - 0.5);
 
             for (let i = 0; i < options.length; i++) {
@@ -200,7 +223,7 @@
                 options[i].onclick = () => checkAnswer(shuffledAnswers[i], options[i]);
             }
 
-            questionText.textContent = 'Which car model is this?';
+            questionText.textContent = 'Cili është modeli i veturës së dhënë?';
             applyFilter(currentQuestion.level);
         }
 
@@ -218,23 +241,45 @@
                 correctButton.classList.add('correct');
             }
 
-            // Disable buttons after selecting an answer
             options.forEach(button => button.onclick = null);
 
-            // Load the next question after a short delay
             setTimeout(() => {
                 currentQuestionIndex++;
                 if (currentQuestionIndex < questions.length) {
                     loadQuestion(currentQuestionIndex);
                 } else {
-                    questionText.textContent = 'Quiz Completed!';
-                    // Optionally reset the game or display the final score
+                    showResult();
                 }
             }, 2000);
         }
 
-        // Load the first question
+        function showResult() {
+            questionText.textContent = 'Quiz Completed!';
+            finalScoreText.textContent = score;
+            result.style.display = 'block';
+
+            console.log('Score:', score); // Debug line
+            if (score <= 50) {
+                resultGif.src = 'imagess/you-failed.gif';
+            } else if (score <= 100) {
+                resultGif.src = 'imagess/very-nice.gif';
+            } else {
+                resultGif.src = 'imagess/Excellent.gif';
+            }
+
+            console.log('Result GIF Source:', resultGif.src); // Debug line
+        }
+
         loadQuestion(currentQuestionIndex);
+        audioButton.addEventListener('click', () => {
+            if (backgroundAudio.muted) {
+                backgroundAudio.muted = false;
+                audioControl.innerHTML = '<path d="M3 9v6h4l5 5V4l-5 5H3zm13.59 3l2.7 2.7-1.41 1.41-2.7-2.7V14.5h-2v-5h2v1.29l2.7-2.7 1.41 1.41-2.7 2.7z"/>';
+            } else {
+                backgroundAudio.muted = true;
+                audioControl.innerHTML = '<path d="M16.5 12l2.79-2.79-1.42-1.42L15 10.59 12.21 7.79 10.79 9.21 13.59 12l-2.8 2.79 1.42 1.42L15 13.41l2.79 2.8 1.42-1.42L16.5 12zM3 9v6h4l5 5V4L7 9H3z"/>';
+            }
+        });
     </script>
 </body>
 </html>
